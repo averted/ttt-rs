@@ -1,18 +1,20 @@
 mod board;
-mod core;
 mod r#move;
 mod position;
 mod renderer;
+mod turn;
 
 use crate::board::Board;
+use crate::position::Position;
+use crate::turn::Turn;
 
-pub fn run() -> Result<Option<core::Turn>, &'static str> {
+pub fn run() -> Result<Option<Turn>, &'static str> {
     let mut board = Board::new();
 
     while board.get_remaining_moves() > 0 {
         board.render();
 
-        match board.move_to(core::get_position_from_string(board.ask_for_move()?)?) {
+        match board.move_to(Position::from_str(board.ask_for_move()?)?) {
             Ok(opt) => {
                 if let Some(_) = opt {
                     continue;

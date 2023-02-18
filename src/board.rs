@@ -1,8 +1,7 @@
-use crate::core as todo;
-use crate::core::Turn;
 use crate::position::Position;
 use crate::r#move::Move;
 use crate::renderer::Renderer;
+use crate::turn::Turn;
 
 use std::collections::HashMap;
 use std::io;
@@ -35,7 +34,60 @@ impl Board {
         println!("{}", self.renderer.render(&self.moves));
     }
 
-    pub fn is_available(&self, pos: &Position) -> bool {
+    pub fn move_to(&mut self, pos: Position) -> Result<Option<Turn>, &'static str> {
+        if self.is_available(&pos) {
+            self.moves.push(Move::new(self.turn, Position::from(&pos)));
+
+            println!("Moving to: {}", pos);
+
+            if self.check_for_win() {
+                return Ok(self.winner);
+            }
+
+            self.turn = Turn::flip(self.turn);
+            return Ok(None);
+        }
+
+        Err("Move is not available")
+    }
+
+    pub fn get_remaining_moves(&self) -> usize {
+        if let Some(_) = &self.winner {
+            return 0;
+        }
+
+        9 - self.moves.len()
+    }
+
+    pub fn ask_for_move(&self) -> Result<String, &'static str> {
+        println!("Enter move:");
+
+        let mut input = String::new();
+        if let Err(_) = io::stdin().read_line(&mut input) {
+            return Err("IO Error");
+        }
+
+        let input: String = input.trim().parse().unwrap();
+
+        if input.len() != 2 {
+            return Err("Invalid input length");
+        }
+
+        Ok(input)
+    }
+
+    pub fn make_ai_move(&mut self) -> Result<Option<Turn>, &'static str> {
+        let mut pos: Position = Position::rand();
+
+        // TODO: Optimize
+        while !self.is_available(&pos) {
+            pos = Position::rand();
+        }
+
+        Ok(self.move_to(pos)?)
+    }
+
+    fn is_available(&self, pos: &Position) -> bool {
         !self.moves.iter().any(|x| x.at(&pos))
     }
 
@@ -86,62 +138,5 @@ impl Board {
         }
 
         false
-    }
-
-    pub fn move_to(&mut self, pos: Position) -> Result<Option<Turn>, &'static str> {
-        if self.is_available(&pos) {
-            self.moves.push(Move::new(self.turn, Position::from(&pos)));
-
-            println!("Moving to: {}", pos);
-
-            if self.check_for_win() {
-                return Ok(self.winner);
-            }
-
-            self.flip_turn();
-            return Ok(None);
-        }
-
-        Err("Move is not available")
-    }
-
-    pub fn flip_turn(&mut self) {
-        self.turn = Turn::not(self.turn)
-    }
-
-    pub fn get_remaining_moves(&self) -> usize {
-        if let Some(_) = &self.winner {
-            return 0;
-        }
-
-        9 - self.moves.len()
-    }
-
-    pub fn ask_for_move(&self) -> Result<String, &'static str> {
-        println!("Enter move ({:?}):", &self.turn);
-
-        let mut input = String::new();
-        if let Err(_) = io::stdin().read_line(&mut input) {
-            return Err("IO Error");
-        }
-
-        let input: String = input.trim().parse().unwrap();
-
-        if input.len() != 2 {
-            return Err("Invalid input length");
-        }
-
-        Ok(input)
-    }
-
-    pub fn make_ai_move(&mut self) -> Result<Option<Turn>, &'static str> {
-        let mut pos: Position = todo::get_random_position();
-
-        // TODO: Optimize
-        while !self.is_available(&pos) {
-            pos = todo::get_random_position();
-        }
-
-        Ok(self.move_to(pos)?)
     }
 }

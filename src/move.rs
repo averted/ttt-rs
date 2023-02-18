@@ -1,5 +1,5 @@
-use crate::core::Turn;
 use crate::position::Position;
+use crate::turn::Turn;
 
 pub struct Move {
     pub turn: Turn,

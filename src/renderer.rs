@@ -1,6 +1,6 @@
-use crate::core;
 use crate::position::Position;
 use crate::r#move::Move;
+use crate::turn::Turn;
 use colored::*;
 
 pub struct Renderer {
@@ -25,11 +25,10 @@ impl Renderer {
             let mut bot = " |".to_string();
 
             for (col_idx, _) in row.iter().enumerate() {
-                let pos = Position::new(
-                    core::get_file_from_index(col_idx),
-                    core::get_rank_from_index(row_idx),
-                );
-                let m = moves.iter().find(|x| x.at(&pos));
+                let m = match Position::from_idx(col_idx, row_idx) {
+                    Some(pos) => moves.iter().find(|x| x.at(&pos)),
+                    None => None,
+                };
                 let (t, m, b) = &self.render_cell(m, row_idx, col_idx);
 
                 top = format!("{}{}", top, t);
@@ -54,7 +53,7 @@ impl Renderer {
                     format!(
                         "{}{}{}",
                         spacer,
-                        if mov.turn == core::Turn::X {
+                        if mov.turn == Turn::X {
                             mov.turn.to_string().red()
                         } else {
                             mov.turn.to_string().green()
