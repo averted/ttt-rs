@@ -15,13 +15,14 @@ impl Renderer {
     }
 
     pub fn render(&self, moves: &Vec<Move>) -> String {
-        let border = String::from("-----------");
+        let border = String::from(" -----------");
+        let legend = String::from("   a  b  c  ");
         let mut result = String::from(&border);
 
         for (row_idx, row) in self.matrix.iter().enumerate() {
-            let mut top = "|".to_string();
-            let mut mid = "|".to_string();
-            let mut bot = "|".to_string();
+            let mut top = " |".to_string();
+            let mut mid = format!("{}|", 3 - (row_idx));
+            let mut bot = " |".to_string();
 
             for (col_idx, _) in row.iter().enumerate() {
                 let pos = Position::new(
@@ -36,14 +37,13 @@ impl Renderer {
                 bot = format!("{}{}", bot, b);
             }
 
-            result = format!("{}\n{}|\n{}|\n{}|", result, top, mid, bot)
+            result = format!("{result}\n{top}|\n{mid}|\n{bot}|")
         }
 
-        format!("{}\n{}", result, border)
+        format!("{result}\n{border}\n{legend}")
     }
 
     fn render_cell(&self, m: Option<&Move>, row: usize, col: usize) -> (String, String, String) {
-        // ░  ·
         let spacer = if (row + col) % 2 == 0 { "·" } else { " " };
         let buffer = format!("{}{}{}", spacer, spacer, spacer);
 
