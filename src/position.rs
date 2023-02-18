@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter, Result};
 
+#[derive(Debug)]
 pub struct Position {
     pub file: char,
     pub rank: u8,
