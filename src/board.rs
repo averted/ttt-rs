@@ -51,14 +51,6 @@ impl Board {
         Err("Move is not available")
     }
 
-    pub fn get_remaining_moves(&self) -> usize {
-        if let Some(_) = &self.winner {
-            return 0;
-        }
-
-        9 - self.moves.len()
-    }
-
     pub fn ask_for_move(&self) -> Result<String, &'static str> {
         println!("Enter move:");
 
@@ -92,17 +84,8 @@ impl Board {
     }
 
     fn check_for_win(&mut self) -> bool {
-        let mut arr = vec![];
+        let mut arr: Vec<&Move> = self.moves.iter().filter(|x| x.turn == self.turn).collect();
         let mut map: HashMap<Value, u8> = HashMap::new();
-
-        // filter moves for current turn
-        for i in 0..self.moves.len() {
-            let m = &self.moves[i];
-
-            if m.turn == self.turn {
-                arr.push(m)
-            }
-        }
 
         if arr.len() <= 2 {
             return false;

@@ -11,7 +11,7 @@ use crate::turn::Turn;
 pub fn run() -> Result<Option<Turn>, &'static str> {
     let mut board = Board::new();
 
-    while board.get_remaining_moves() > 0 {
+    while board.winner == None {
         board.render();
 
         match board.move_to(Position::from_str(board.ask_for_move()?)?) {
