@@ -1,14 +1,14 @@
+use crate::player::Player;
 use crate::position::Position;
-use crate::turn::Turn;
 
-pub struct Move {
-    pub turn: Turn,
+pub struct Square {
+    pub player: Player,
     position: Position,
 }
 
-impl Move {
-    pub fn new(turn: Turn, position: Position) -> Self {
-        Self { turn, position }
+impl Square {
+    pub fn new(player: Player, position: Position) -> Self {
+        Self { player, position }
     }
 
     pub fn at(&self, position: &Position) -> bool {

@@ -1,14 +1,14 @@
 mod board;
-mod r#move;
+mod player;
 mod position;
 mod renderer;
-mod turn;
+mod square;
 
 use crate::board::Board;
+use crate::player::Player;
 use crate::position::Position;
-use crate::turn::Turn;
 
-pub fn run() -> Result<Option<Turn>, &'static str> {
+pub fn run() -> Result<Option<Player>, &'static str> {
     let mut board = Board::new();
 
     while board.winner == None {

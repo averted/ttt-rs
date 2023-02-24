@@ -1,27 +1,27 @@
 use std::fmt::{Display, Formatter, Result};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum Turn {
+pub enum Player {
     X,
     O,
 }
 
-impl Turn {
-    pub fn flip(t: Turn) -> Self {
-        match t {
-            Turn::X => Turn::O,
-            Turn::O => Turn::X,
+impl Player {
+    pub fn flip(player: Player) -> Self {
+        match player {
+            Player::X => Player::O,
+            Player::O => Player::X,
         }
     }
 }
 
-impl Display for Turn {
+impl Display for Player {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            Turn::X => {
+            Player::X => {
                 write!(f, "X")
             }
-            Turn::O => {
+            Player::O => {
                 write!(f, "O")
             }
         }

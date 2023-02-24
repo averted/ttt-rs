@@ -1,6 +1,6 @@
+use crate::player::Player;
 use crate::position::Position;
-use crate::r#move::Move;
-use crate::turn::Turn;
+use crate::square::Square;
 use colored::*;
 
 pub struct Renderer {
@@ -14,7 +14,11 @@ impl Renderer {
         }
     }
 
-    pub fn render(&self, moves: &Vec<Move>) -> String {
+    pub fn clear(&self) {
+        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+    }
+
+    pub fn draw(&self, squares: &Vec<Square>) {
         let border = String::from(" -----------");
         let legend = String::from("   a  b  c  ");
         let mut result = String::from(&border);
@@ -25,11 +29,11 @@ impl Renderer {
             let mut bot = " |".to_string();
 
             for (col_idx, _) in row.iter().enumerate() {
-                let m = match Position::from_idx(col_idx, row_idx) {
-                    Some(pos) => moves.iter().find(|x| x.at(&pos)),
+                let s = match Position::from_idx(col_idx, row_idx) {
+                    Some(pos) => squares.iter().find(|x| x.at(&pos)),
                     None => None,
                 };
-                let (t, m, b) = &self.render_cell(m, row_idx, col_idx);
+                let (t, m, b) = &self.render_cell(s, row_idx, col_idx);
 
                 top = format!("{}{}", top, t);
                 mid = format!("{}{}", mid, m);
@@ -39,24 +43,29 @@ impl Renderer {
             result = format!("{result}\n{top}|\n{mid}|\n{bot}|")
         }
 
-        format!("{result}\n{border}\n{legend}")
+        println!("{result}\n{border}\n{legend}")
     }
 
-    fn render_cell(&self, m: Option<&Move>, row: usize, col: usize) -> (String, String, String) {
+    fn render_cell(
+        &self,
+        square: Option<&Square>,
+        row: usize,
+        col: usize,
+    ) -> (String, String, String) {
         let spacer = if (row + col) % 2 == 0 { "·" } else { " " };
         let buffer = format!("{}{}{}", spacer, spacer, spacer);
 
         (
             String::from(&buffer),
-            match m {
+            match square {
                 Some(mov) => {
                     format!(
                         "{}{}{}",
                         spacer,
-                        if mov.turn == Turn::X {
-                            mov.turn.to_string().red()
+                        if mov.player == Player::X {
+                            mov.player.to_string().red()
                         } else {
-                            mov.turn.to_string().green()
+                            mov.player.to_string().green()
                         },
                         spacer
                     )

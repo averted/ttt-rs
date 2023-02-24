@@ -1,7 +1,7 @@
+use crate::player::Player;
 use crate::position::Position;
-use crate::r#move::Move;
 use crate::renderer::Renderer;
-use crate::turn::Turn;
+use crate::square::Square;
 
 use std::collections::HashMap;
 use std::io;
@@ -13,30 +13,31 @@ enum Value {
 }
 
 pub struct Board {
-    pub turn: Turn,
-    pub winner: Option<Turn>,
-    moves: Vec<Move>,
+    pub player: Player,
+    pub winner: Option<Player>,
+    squares: Vec<Square>,
     renderer: Renderer,
 }
 
 impl Board {
     pub fn new() -> Self {
         Self {
-            turn: Turn::X,
-            moves: vec![],
+            player: Player::X,
+            squares: vec![],
             winner: None,
             renderer: Renderer::new(),
         }
     }
 
     pub fn render(&self) {
-        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-        println!("{}", self.renderer.render(&self.moves));
+        self.renderer.clear();
+        self.renderer.draw(&self.squares);
     }
 
-    pub fn move_to(&mut self, pos: Position) -> Result<Option<Turn>, &'static str> {
-        if self.is_available(&pos) {
-            self.moves.push(Move::new(self.turn, Position::from(&pos)));
+    pub fn move_to(&mut self, pos: Position) -> Result<Option<Player>, &'static str> {
+        if self.is_move_available(&pos) {
+            self.squares
+                .push(Square::new(self.player, Position::from(&pos)));
 
             println!("Moving to: {}", pos);
 
@@ -44,7 +45,7 @@ impl Board {
                 return Ok(self.winner);
             }
 
-            self.turn = Turn::flip(self.turn);
+            self.player = Player::flip(self.player);
             return Ok(None);
         }
 
@@ -68,23 +69,27 @@ impl Board {
         Ok(input)
     }
 
-    pub fn make_ai_move(&mut self) -> Result<Option<Turn>, &'static str> {
+    pub fn make_ai_move(&mut self) -> Result<Option<Player>, &'static str> {
         let mut pos: Position = Position::rand();
 
         // TODO: Optimize
-        while !self.is_available(&pos) {
+        while !self.is_move_available(&pos) {
             pos = Position::rand();
         }
 
         Ok(self.move_to(pos)?)
     }
 
-    fn is_available(&self, pos: &Position) -> bool {
-        !self.moves.iter().any(|x| x.at(&pos))
+    fn is_move_available(&self, pos: &Position) -> bool {
+        !self.squares.iter().any(|x| x.at(&pos))
     }
 
     fn check_for_win(&mut self) -> bool {
-        let mut arr: Vec<&Move> = self.moves.iter().filter(|x| x.turn == self.turn).collect();
+        let arr: Vec<&Square> = self
+            .squares
+            .iter()
+            .filter(|x| x.player == self.player)
+            .collect();
         let mut map: HashMap<Value, u8> = HashMap::new();
 
         if arr.len() <= 2 {
@@ -103,7 +108,7 @@ impl Board {
 
         for (_, count) in &map {
             if *count == 3 {
-                self.winner = Some(self.turn);
+                self.winner = Some(self.player);
                 return true;
             }
         }
@@ -116,7 +121,7 @@ impl Board {
             && map.contains_key(&Value::Char('c'))
             && arr.iter().any(|x| x.at(&Position::new('b', 2)))
         {
-            self.winner = Some(self.turn);
+            self.winner = Some(self.player);
             return true;
         }
 
