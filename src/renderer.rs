@@ -1,16 +1,17 @@
 use crate::player::Player;
 use crate::position::Position;
 use crate::square::Square;
-use colored::*;
+use crate::BOARD_SIZE;
+use colored::Colorize;
 
 pub struct Renderer {
-    matrix: [[u8; 3]; 3],
+    matrix: Vec<Vec<usize>>,
 }
 
 impl Renderer {
     pub fn new() -> Self {
         Self {
-            matrix: [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            matrix: vec![vec![0; BOARD_SIZE]; BOARD_SIZE],
         }
     }
 
@@ -19,20 +20,26 @@ impl Renderer {
     }
 
     pub fn draw(&self, squares: &Vec<Square>) {
-        let border = String::from(" -----------");
-        let legend = String::from("   a  b  c  ");
-        let mut result = String::from(&border);
+        let mut border = String::new();
+        let mut legend = String::new();
+
+        for i in 0..BOARD_SIZE {
+            border.push_str("---");
+            legend.push_str(&format!(" {} ", i));
+        }
+
+        let border = format!(" -{border}-");
+        let legend = format!("  {legend} ");
+        let mut result = String::new();
 
         for (row_idx, row) in self.matrix.iter().enumerate() {
             let mut top = " |".to_string();
-            let mut mid = format!("{}|", 3 - (row_idx));
+            let mut mid = format!("{}|", row_idx);
             let mut bot = " |".to_string();
 
             for (col_idx, _) in row.iter().enumerate() {
-                let s = match Position::from_idx(col_idx, row_idx) {
-                    Some(pos) => squares.iter().find(|x| x.at(&pos)),
-                    None => None,
-                };
+                let pos = Position::new(col_idx, row_idx);
+                let s = squares.iter().find(|x| x.at(&pos));
                 let (t, m, b) = &self.render_cell(s, row_idx, col_idx);
 
                 top = format!("{}{}", top, t);
@@ -43,7 +50,7 @@ impl Renderer {
             result = format!("{result}\n{top}|\n{mid}|\n{bot}|")
         }
 
-        println!("{result}\n{border}\n{legend}")
+        println!("{legend}\n{border}{result}\n{border}")
     }
 
     fn render_cell(

@@ -1,75 +1,53 @@
+use crate::BOARD_SIZE;
 use rand::Rng;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 #[derive(Debug)]
 pub struct Position {
-    pub file: char,
-    pub rank: u8,
+    pub x: usize,
+    pub y: usize,
 }
 
 impl Display for Position {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "Position({}-{})", self.file, self.rank)
+        write!(f, "Position({}-{})", self.x, self.y)
     }
 }
 
 impl PartialEq for Position {
     fn eq(&self, other: &Position) -> bool {
-        self.file == other.file && self.rank == other.rank
+        self.x == other.x && self.y == other.y
     }
 }
 
 impl Position {
-    pub fn new(file: char, rank: u8) -> Self {
-        Self { file, rank }
+    pub fn new(x: usize, y: usize) -> Self {
+        Self { x, y }
     }
 
     pub fn rand() -> Self {
-        let file: u8 = 100 - rand::thread_rng().gen_range(1, 4);
-        let rank: u8 = rand::thread_rng().gen_range(1, 4);
+        let x: usize = rand::thread_rng().gen_range(0, BOARD_SIZE);
+        let y: usize = rand::thread_rng().gen_range(0, BOARD_SIZE);
 
-        Self {
-            file: file as char,
-            rank,
-        }
-    }
-
-    pub fn from(pos: &Position) -> Self {
-        Self {
-            file: pos.file,
-            rank: pos.rank,
-        }
+        Self { x, y }
     }
 
     pub fn from_str(s: String) -> Result<Self, &'static str> {
-        let file: char = s.chars().nth(0).unwrap();
-        let rank: u8 = match s.chars().nth(1).unwrap().to_digit(10) {
-            Some(rank) => rank as u8,
+        let x: usize = match s.chars().nth(0).unwrap().to_digit(10) {
+            Some(x) => x as usize,
             None => return Err("Invalid position"),
         };
 
-        if file > 'c' || file < 'a' || rank > 3 || rank < 1 {
+        let y: usize = match s.chars().nth(1).unwrap().to_digit(10) {
+            Some(y) => y as usize,
+            None => return Err("Invalid position"),
+        };
+
+        if x > BOARD_SIZE - 1 || y > BOARD_SIZE - 1 {
             return Err("Invalid position");
         }
 
-        Ok(Self { file, rank })
-    }
-
-    pub fn from_idx(col_idx: usize, row_idx: usize) -> Option<Self> {
-        let file = match col_idx {
-            0 => 'a',
-            1 => 'b',
-            2 => 'c',
-            _ => return None,
-        };
-
-        let rank = if row_idx > 2 {
-            return None;
-        } else {
-            (3 - row_idx) as u8
-        };
-
-        Some(Self { file, rank })
+        Ok(Self { x, y })
     }
 }
 
@@ -78,35 +56,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn correct_position_from_valid_idx() {
-        assert_eq!(Position::from_idx(0, 0), Some(Position::new('a', 3)));
-        assert_eq!(Position::from_idx(1, 1), Some(Position::new('b', 2)));
-        assert_eq!(Position::from_idx(2, 2), Some(Position::new('c', 1)));
-    }
-
-    #[test]
-    fn correct_position_from_invalid_idx() {
-        assert_eq!(Position::from_idx(99, 0), None);
-        assert_eq!(Position::from_idx(3, 0), None);
-        assert_eq!(Position::from_idx(0, 99), None);
-        assert_eq!(Position::from_idx(0, 3), None);
-    }
-
-    #[test]
     fn correct_position_from_valid_string() {
         assert_eq!(
-            Position::from_str(String::from("a1")),
-            Ok(Position::new('a', 1))
+            Position::from_str(String::from("00")),
+            Ok(Position::new(0, 0))
         );
 
         assert_eq!(
-            Position::from_str(String::from("b2")),
-            Ok(Position::new('b', 2))
+            Position::from_str(String::from("11")),
+            Ok(Position::new(1, 1))
         );
 
         assert_eq!(
-            Position::from_str(String::from("c3")),
-            Ok(Position::new('c', 3))
+            Position::from_str(String::from("22")),
+            Ok(Position::new(2, 2))
         );
     }
 

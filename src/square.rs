@@ -1,6 +1,7 @@
 use crate::player::Player;
 use crate::position::Position;
 
+#[derive(Debug)]
 pub struct Square {
     pub player: Player,
     position: Position,
@@ -15,11 +16,11 @@ impl Square {
         self.position == *position
     }
 
-    pub fn rank(&self) -> u8 {
-        self.position.rank
+    pub fn x(&self) -> usize {
+        self.position.x
     }
 
-    pub fn file(&self) -> char {
-        self.position.file
+    pub fn y(&self) -> usize {
+        self.position.y
     }
 }
