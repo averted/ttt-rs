@@ -37,6 +37,7 @@ impl Board {
     pub fn render(&self) {
         self.renderer.clear();
         self.renderer.draw(&self.squares);
+        self.renderer.paint_frame(&self.squares);
     }
 
     pub fn move_to(&mut self, pos: Position) -> Result<Option<Player>, &'static str> {

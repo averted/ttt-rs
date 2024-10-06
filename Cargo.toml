@@ -9,3 +9,4 @@ authors = ["Alexander Vitiuk"]
 [dependencies]
 colored = "2.0.0"
 rand = "0.3.14"
+three-d = "0.14.1"
